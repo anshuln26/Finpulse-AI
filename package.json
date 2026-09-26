@@ -1,0 +1,13 @@
+{
+  "name": "finpulse-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-Based Personalized Financial Health & Investment Recommender with Consent Architecture",
+  "scripts": {
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build:client": "npm run build --prefix client",
+    "build": "npm run build:server && npm run build:client"
+  }
+}

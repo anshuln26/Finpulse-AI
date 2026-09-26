@@ -1,0 +1,147 @@
+{
+  "consent": {
+    "shareTransactions": true,
+    "shareIncome": true,
+    "shareInvestments": true,
+    "aiAdvisoryConsent": true,
+    "lastUpdated": "2026-09-24T10:07:18.337Z"
+  },
+  "profile": {
+    "name": "Aarav Sharma",
+    "monthlyIncome": 85000,
+    "savingsGoal": 25000,
+    "riskTolerance": "conservative",
+    "investmentHorizonYears": 7,
+    "emergencyFundTargetMonths": 6,
+    "emergencyFundCurrent": 180000,
+    "existingInvestments": {
+      "equity": 250000,
+      "debt": 120000,
+      "gold": 60000,
+      "cash": 40000
+    }
+  },
+  "transactions": [
+    {
+      "date": "2026-09-24",
+      "description": "Upwork Web App Development",
+      "source": "Upwork Client",
+      "amount": 35000,
+      "type": "income",
+      "category": "Freelance",
+      "paymentMethod": "Direct Bank Transfer (NEFT / IMPS)",
+      "notes": "Milestone payment for fintech UI",
+      "id": "tx-1790244489741-66c59"
+    },
+    {
+      "id": "tx-1",
+      "date": "2026-09-01",
+      "description": "Monthly Salary Credit (Tech Corp)",
+      "amount": 85000,
+      "type": "income",
+      "category": "Other",
+      "paymentMethod": "Net Banking",
+      "notes": "Direct corporate payroll deposit via NEFT"
+    },
+    {
+      "id": "tx-2",
+      "date": "2026-09-02",
+      "description": "2BHK Apartment Rent",
+      "amount": 24000,
+      "type": "expense",
+      "category": "Housing",
+      "paymentMethod": "Net Banking",
+      "notes": "Essential house rent"
+    },
+    {
+      "id": "tx-3",
+      "date": "2026-09-03",
+      "description": "Supermarket Grocery & Zepto Pantry",
+      "amount": 7200,
+      "type": "expense",
+      "category": "Food & Dining",
+      "paymentMethod": "UPI",
+      "notes": "Monthly staples & fresh vegetables"
+    },
+    {
+      "id": "tx-4",
+      "date": "2026-09-05",
+      "description": "Electricity Bill & JioFiber Broadband",
+      "amount": 3100,
+      "type": "expense",
+      "category": "Utilities",
+      "paymentMethod": "UPI",
+      "notes": "Monthly utility bills"
+    },
+    {
+      "id": "tx-5",
+      "date": "2026-09-07",
+      "description": "Weekend Dining & Lounge with Friends",
+      "amount": 4500,
+      "type": "expense",
+      "category": "Food & Dining",
+      "paymentMethod": "Credit Card",
+      "notes": "Discretionary weekend social dinner"
+    },
+    {
+      "id": "tx-6",
+      "date": "2026-09-10",
+      "description": "Metro Card Recharge & Uber Auto Commutes",
+      "amount": 2600,
+      "type": "expense",
+      "category": "Transportation",
+      "paymentMethod": "UPI",
+      "notes": "Office commute & metro pass"
+    },
+    {
+      "id": "tx-8",
+      "date": "2026-09-14",
+      "description": "UTI Nifty 50 Index Mutual Fund SIP",
+      "amount": 12000,
+      "type": "expense",
+      "category": "Investment",
+      "paymentMethod": "Net Banking",
+      "notes": "Automated disciplined equity SIP on Zerodha Coin"
+    },
+    {
+      "id": "tx-9",
+      "date": "2026-09-16",
+      "description": "Online Shopping (Amazon Great Indian Sale)",
+      "amount": 5400,
+      "type": "expense",
+      "category": "Shopping",
+      "paymentMethod": "Credit Card",
+      "notes": "Apparel and electronics sale"
+    },
+    {
+      "id": "tx-10",
+      "date": "2026-09-18",
+      "description": "Apollo Pharmacy & Diagnostic Lab Checkup",
+      "amount": 1450,
+      "type": "expense",
+      "category": "Healthcare",
+      "paymentMethod": "UPI",
+      "notes": "Routine health vitamins and preventive checkup"
+    },
+    {
+      "id": "tx-11",
+      "date": "2026-09-20",
+      "description": "Swiggy & Zomato Food Deliveries",
+      "amount": 3800,
+      "type": "expense",
+      "category": "Food & Dining",
+      "paymentMethod": "UPI",
+      "notes": "Late night takeout and weekend food deliveries"
+    },
+    {
+      "id": "tx-12",
+      "date": "2026-09-22",
+      "description": "PVR INOX Movie Tickets & Snacks",
+      "amount": 1400,
+      "type": "expense",
+      "category": "Entertainment",
+      "paymentMethod": "UPI",
+      "notes": "Weekend movie outing with popcorn"
+    }
+  ]
+}
