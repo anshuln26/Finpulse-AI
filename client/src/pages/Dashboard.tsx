@@ -11,7 +11,6 @@ import {
   Plus,
   UploadCloud,
   TrendingUp,
-  Calculator,
   Wallet,
 } from 'lucide-react';
 import {
@@ -78,26 +77,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const isTxShared = consent?.shareTransactions;
   const isInvestShared = consent?.shareInvestments;
 
-  // SIP Calculator State
-  const defaultMonthly = plan?.recommendedMonthlyInvestment || 15000;
-  const [sipMonthly, setSipMonthly] = useState<number>(defaultMonthly);
-  const [sipYears, setSipYears] = useState<number>(profile?.investmentHorizonYears || 10);
-  const [expectedReturn, setExpectedReturn] = useState<number>(12); // 12% default CAGR for Nifty 50
   const [updatingRisk, setUpdatingRisk] = useState(false);
-
-  // Calculate SIP compounding values
-  const monthlyRate = expectedReturn / 12 / 100;
-  const totalMonths = sipYears * 12;
-  const totalInvested = sipMonthly * totalMonths;
-  const futureValue =
-    monthlyRate > 0
-      ? Math.round(
-          sipMonthly *
-            ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate) *
-            (1 + monthlyRate)
-        )
-      : totalInvested;
-  const estimatedReturns = Math.max(0, futureValue - totalInvested);
 
   // Prepare Expense Donut Data
   const expensePieData = (budget?.categories || []).map((cat) => ({
@@ -728,111 +708,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </div>
         )}
-
-        {/* Interactive SIP Compounding Wealth Calculator */}
-        <div className="bg-gradient-to-br from-teal-50/80 via-emerald-50/30 to-slate-50/80 dark:bg-none dark:bg-[#111827] border border-teal-200/90 dark:border-slate-800 rounded-2xl p-6 transition-colors shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <Calculator className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              Interactive SIP Compounding Wealth Simulator
-            </h3>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-6">
-            Adjust monthly investment, tenure, and expected returns to project your wealth creation over time.
-          </p>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            {/* Sliders (7 Cols) */}
-            <div className="lg:col-span-7 space-y-4">
-              <div>
-                <div className="flex justify-between text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                  <span>Monthly Investment</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">₹{sipMonthly.toLocaleString('en-IN')}</span>
-                </div>
-                <input
-                  type="range"
-                  min={1000}
-                  max={100000}
-                  step={1000}
-                  value={sipMonthly}
-                  onChange={(e) => setSipMonthly(Number(e.target.value))}
-                  className="w-full accent-emerald-600 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg cursor-pointer"
-                />
-                <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                  <span>₹1,000</span>
-                  <span>₹50,000</span>
-                  <span>₹1,00,000</span>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                  <span>Investment Horizon</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{sipYears} Years</span>
-                </div>
-                <input
-                  type="range"
-                  min={1}
-                  max={30}
-                  step={1}
-                  value={sipYears}
-                  onChange={(e) => setSipYears(Number(e.target.value))}
-                  className="w-full accent-emerald-600 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg cursor-pointer"
-                />
-                <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                  <span>1 Year</span>
-                  <span>15 Years</span>
-                  <span>30 Years</span>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                  <span>Expected Annual Return (CAGR)</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{expectedReturn}%</span>
-                </div>
-                <input
-                  type="range"
-                  min={6}
-                  max={18}
-                  step={0.5}
-                  value={expectedReturn}
-                  onChange={(e) => setExpectedReturn(Number(e.target.value))}
-                  className="w-full accent-emerald-600 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg cursor-pointer"
-                />
-                <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                  <span>6% (FD/Debt)</span>
-                  <span>12% (Nifty 50)</span>
-                  <span>18% (Mid/Small)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Projected Corpus Results (5 Cols) */}
-            <div className="lg:col-span-5 bg-white/90 dark:bg-slate-900/80 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-5 shadow-sm text-center">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Projected Maturity Value
-              </span>
-              <div className="text-3xl sm:text-4xl font-extrabold text-emerald-600 dark:text-emerald-400 my-2">
-                ₹{futureValue.toLocaleString('en-IN')}
-              </div>
-              <div className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-4">
-                Total Wealth Multiplier: <span className="text-emerald-600 dark:text-emerald-400 font-bold">{(futureValue / (totalInvested || 1)).toFixed(1)}x</span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-slate-200/80 dark:border-slate-800 text-left">
-                <div>
-                  <p className="text-slate-500">Invested Capital</p>
-                  <p className="font-bold text-slate-900 dark:text-white mt-0.5">₹{totalInvested.toLocaleString('en-IN')}</p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Est. Growth Gain</p>
-                  <p className="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">+₹{estimatedReturns.toLocaleString('en-IN')}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* =========================================================================
