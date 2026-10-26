@@ -106,7 +106,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const emergencyMonths = plan?.emergencyFundHealth.monthsCovered ?? 0;
-  const emergencyTarget = plan?.emergencyFundHealth.target ?? 180000;
+  const emergencyTarget = plan?.emergencyFundHealth.target ?? 0;
   const emergencyCurrent = plan?.emergencyFundHealth.current ?? 0;
 
   return (
@@ -121,7 +121,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               Master Financial Dashboard
             </span>
             <span className="text-xs text-slate-500 dark:text-slate-400">
-              Welcome back, {profile?.name || 'Aarav'}
+              Welcome back, {profile?.name || 'User'}
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">

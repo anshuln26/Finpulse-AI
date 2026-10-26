@@ -8,14 +8,14 @@
 -- Stores user financial profile, monthly income, savings targets, and risk tolerance
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  name TEXT NOT NULL DEFAULT 'Aarav Sharma',
-  monthly_income NUMERIC(12, 2) NOT NULL DEFAULT 85000,
-  savings_goal NUMERIC(12, 2) NOT NULL DEFAULT 25000,
+  name TEXT NOT NULL DEFAULT 'User',
+  monthly_income NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  savings_goal NUMERIC(12, 2) NOT NULL DEFAULT 0,
   risk_tolerance TEXT NOT NULL DEFAULT 'moderate' CHECK (risk_tolerance IN ('conservative', 'moderate', 'aggressive')),
   investment_horizon_years INTEGER NOT NULL DEFAULT 7,
   emergency_fund_target_months INTEGER NOT NULL DEFAULT 6,
-  emergency_fund_current NUMERIC(12, 2) NOT NULL DEFAULT 180000,
-  existing_investments JSONB NOT NULL DEFAULT '{"equity": 250000, "debt": 120000, "gold": 60000, "cash": 40000}'::jsonb,
+  emergency_fund_current NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  existing_investments JSONB NOT NULL DEFAULT '{"equity": 0, "debt": 0, "gold": 0, "cash": 0}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
