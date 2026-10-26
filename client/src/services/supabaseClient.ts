@@ -1,7 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+// Fallback to configured FinPulse Supabase project so it works out of the box on both Vercel and local
+const supabaseUrl =
+  (import.meta.env.VITE_SUPABASE_URL as string) ||
+  'https://kfucjddpfmyjotnwqxzb.supabase.co';
+
+const supabaseAnonKey =
+  (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
+  (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string) ||
+  'sb_publishable_9OQhnQjG2dcKZJixevjxjQ_xrfIvqSQ';
 
 export const isSupabaseConfigured = (): boolean => {
   return (
