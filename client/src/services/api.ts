@@ -103,12 +103,19 @@ export const api = {
   // AI
   async chatWithAI(
     message: string,
-    history: { role: 'user' | 'assistant'; content: string }[]
+    history: { role: 'user' | 'assistant'; content: string }[],
+    context?: {
+      consent?: UserConsent;
+      profile?: UserProfile;
+      transactions?: Transaction[];
+      budget?: BudgetHealth;
+      plan?: InvestmentPlan;
+    }
   ): Promise<{ reply: string; consentFiltered: boolean }> {
     const res = await fetch(`${BASE_URL}/ai/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, history }),
+      body: JSON.stringify({ message, history, context }),
     });
     return res.json();
   },

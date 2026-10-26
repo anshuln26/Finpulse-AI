@@ -23,6 +23,496 @@
   },
   "transactions": [
     {
+      "date": "2026-09-01",
+      "description": "TCS Monthly Tech Salary Credit",
+      "amount": 95000,
+      "type": "income",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-0-b1p1"
+    },
+    {
+      "date": "2026-09-02",
+      "description": "Prestige Lakeview Apartment Rent",
+      "amount": 28000,
+      "type": "expense",
+      "category": "Housing",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-1-d0tj"
+    },
+    {
+      "date": "2026-09-03",
+      "description": "Blinkit & Zepto Fresh Groceries",
+      "amount": 4250,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-2-rlb8"
+    },
+    {
+      "date": "2026-09-04",
+      "description": "BESCOM Electricity Utility Bill",
+      "amount": 2850,
+      "type": "expense",
+      "category": "Utilities",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-3-vi1x"
+    },
+    {
+      "date": "2026-09-05",
+      "description": "JioFiber High Speed Broadband",
+      "amount": 1180,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-4-e95u"
+    },
+    {
+      "date": "2026-09-06",
+      "description": "Shell Petrol Station Fuel Fillup",
+      "amount": 2500,
+      "type": "expense",
+      "category": "Transportation",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-5-lnzb"
+    },
+    {
+      "date": "2026-09-07",
+      "description": "Upwork International Consulting Payout",
+      "amount": 32000,
+      "type": "income",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-6-fbmc"
+    },
+    {
+      "date": "2026-09-08",
+      "description": "UTI Nifty 50 Index Fund SIP",
+      "amount": 15000,
+      "type": "expense",
+      "category": "Investment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-7-mm9c"
+    },
+    {
+      "date": "2026-09-08",
+      "description": "Parag Parikh Flexi Cap Fund SIP",
+      "amount": 10000,
+      "type": "expense",
+      "category": "Investment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-8-1524"
+    },
+    {
+      "date": "2026-09-10",
+      "description": "Swiggy Gourmet Dinner & Delivery",
+      "amount": 1850,
+      "type": "expense",
+      "category": "Food & Dining",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-9-bbfp"
+    },
+    {
+      "date": "2026-09-12",
+      "description": "Zomato Weekend Biryani Order",
+      "amount": 1240,
+      "type": "expense",
+      "category": "Food & Dining",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-10-izjb"
+    },
+    {
+      "date": "2026-09-13",
+      "description": "PVR Cinemas IMAX Movie Tickets",
+      "amount": 1600,
+      "type": "expense",
+      "category": "Entertainment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-11-swqz"
+    },
+    {
+      "date": "2026-09-14",
+      "description": "Amazon Prime & Netflix Subscription",
+      "amount": 1499,
+      "type": "expense",
+      "category": "Entertainment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-12-3c6c"
+    },
+    {
+      "date": "2026-09-15",
+      "description": "Nature Basket Organic Supermarket",
+      "amount": 3890,
+      "type": "expense",
+      "category": "Food & Dining",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-13-tgd5"
+    },
+    {
+      "date": "2026-09-16",
+      "description": "Cult.fit Annual Gym Membership EMI",
+      "amount": 2200,
+      "type": "expense",
+      "category": "Debt & Loans",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-14-2swm"
+    },
+    {
+      "date": "2026-09-18",
+      "description": "Apollo Pharmacy Vitamins & Medicines",
+      "amount": 1350,
+      "type": "expense",
+      "category": "Healthcare",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-15-4mvw"
+    },
+    {
+      "date": "2026-09-19",
+      "description": "Amazon Great Indian Festival Electronics",
+      "amount": 6400,
+      "type": "expense",
+      "category": "Shopping",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-16-h6a4"
+    },
+    {
+      "date": "2026-09-20",
+      "description": "HDFC Bank Auto Loan EMI",
+      "amount": 8500,
+      "type": "expense",
+      "category": "Debt & Loans",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-17-12yk"
+    },
+    {
+      "date": "2026-09-22",
+      "description": "Namma Metro Smart Card Recharge",
+      "amount": 1000,
+      "type": "expense",
+      "category": "Transportation",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-18-2819"
+    },
+    {
+      "date": "2026-09-24",
+      "description": "Quarterly Equity Stock Dividend Payout",
+      "amount": 4500,
+      "type": "income",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-19-d0mb"
+    },
+    {
+      "date": "2026-09-25",
+      "description": "Blue Tokai Coffee Roasters Beans & Cafe",
+      "amount": 980,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-20-w33q"
+    },
+    {
+      "date": "2026-09-27",
+      "description": "Zara Autumn Collection Apparel",
+      "amount": 4900,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-21-ge80"
+    },
+    {
+      "date": "2026-09-28",
+      "description": "HDFC Midcap Opportunities Fund SIP",
+      "amount": 8000,
+      "type": "expense",
+      "category": "Investment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-22-en52"
+    },
+    {
+      "date": "2026-09-29",
+      "description": "Dunzo Courier & Local Errands",
+      "amount": 420,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-23-xgy1"
+    },
+    {
+      "date": "2026-09-30",
+      "description": "Uber Premier Airport Cabs",
+      "amount": 1650,
+      "type": "expense",
+      "category": "Transportation",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-24-endw"
+    },
+    {
+      "date": "2026-10-01",
+      "description": "TCS Monthly Tech Salary Credit",
+      "amount": 95000,
+      "type": "income",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-25-sa59"
+    },
+    {
+      "date": "2026-10-02",
+      "description": "Prestige Lakeview Apartment Rent",
+      "amount": 28000,
+      "type": "expense",
+      "category": "Housing",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-26-pta7"
+    },
+    {
+      "date": "2026-10-03",
+      "description": "Society Monthly Maintenance Charges",
+      "amount": 3500,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-27-9h3z"
+    },
+    {
+      "date": "2026-10-04",
+      "description": "Instamart Household Staples & Snacks",
+      "amount": 3450,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-28-8cuz"
+    },
+    {
+      "date": "2026-10-05",
+      "description": "Airtel Postpaid & Broadband Combined",
+      "amount": 1599,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-29-41bm"
+    },
+    {
+      "date": "2026-10-06",
+      "description": "Shell Petrol Station Fuel Fillup",
+      "amount": 2600,
+      "type": "expense",
+      "category": "Transportation",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-30-oz4q"
+    },
+    {
+      "date": "2026-10-08",
+      "description": "UTI Nifty 50 Index Fund SIP",
+      "amount": 15000,
+      "type": "expense",
+      "category": "Investment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-31-f32u"
+    },
+    {
+      "date": "2026-10-08",
+      "description": "Parag Parikh Flexi Cap Fund SIP",
+      "amount": 10000,
+      "type": "expense",
+      "category": "Investment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-32-usd4"
+    },
+    {
+      "date": "2026-10-09",
+      "description": "HDFC Midcap Opportunities Fund SIP",
+      "amount": 8000,
+      "type": "expense",
+      "category": "Investment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-33-ky75"
+    },
+    {
+      "date": "2026-10-10",
+      "description": "Web App Development Client Milestone Payout",
+      "amount": 25000,
+      "type": "income",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-34-9jad"
+    },
+    {
+      "date": "2026-10-11",
+      "description": "Toit Microbrewery Weekend Dinner with Friends",
+      "amount": 3600,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-35-dgvl"
+    },
+    {
+      "date": "2026-10-12",
+      "description": "Myntra Festive Sale Clothing",
+      "amount": 3850,
+      "type": "expense",
+      "category": "Shopping",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-36-b9ei"
+    },
+    {
+      "date": "2026-10-14",
+      "description": "Spotify Premium Family Plan",
+      "amount": 179,
+      "type": "expense",
+      "category": "Entertainment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-37-g7k3"
+    },
+    {
+      "date": "2026-10-15",
+      "description": "Star Health Comprehensive Medical Insurance",
+      "amount": 4200,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-38-fr1m"
+    },
+    {
+      "date": "2026-10-17",
+      "description": "Urban Company Home Deep Cleaning Service",
+      "amount": 2100,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-39-7uz7"
+    },
+    {
+      "date": "2026-10-18",
+      "description": "Apollo Pharmacy Monthly Prescription",
+      "amount": 1120,
+      "type": "expense",
+      "category": "Healthcare",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-40-2zgp"
+    },
+    {
+      "date": "2026-10-19",
+      "description": "Apple iCloud Storage & YouTube Premium",
+      "amount": 418,
+      "type": "expense",
+      "category": "Debt & Loans",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-41-710w"
+    },
+    {
+      "date": "2026-10-20",
+      "description": "HDFC Bank Auto Loan EMI",
+      "amount": 8500,
+      "type": "expense",
+      "category": "Debt & Loans",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-42-8kzb"
+    },
+    {
+      "date": "2026-10-21",
+      "description": "Subway Healthy Meal & Cold Pressed Juice",
+      "amount": 560,
+      "type": "expense",
+      "category": "Subscriptions",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-43-yyxu"
+    },
+    {
+      "date": "2026-10-22",
+      "description": "Croma Store Laptop Stand & USB-C Dock",
+      "amount": 2800,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-44-8pkj"
+    },
+    {
+      "date": "2026-10-23",
+      "description": "Decathlon Running Shoes & Sports Gear",
+      "amount": 3499,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-45-lxux"
+    },
+    {
+      "date": "2026-10-24",
+      "description": "Sovereign Gold Bond RBI Tranche SIP",
+      "amount": 10000,
+      "type": "expense",
+      "category": "Investment",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-46-sy65"
+    },
+    {
+      "date": "2026-10-25",
+      "description": "Uber XL Intercity Rides",
+      "amount": 1450,
+      "type": "expense",
+      "category": "Transportation",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-47-ivs5"
+    },
+    {
+      "date": "2026-10-26",
+      "description": "Third Wave Coffee Workspace & Cold Brew",
+      "amount": 650,
+      "type": "expense",
+      "category": "Other",
+      "paymentMethod": "Bank Transfer",
+      "notes": "Imported via CSV Bank Statement",
+      "id": "tx-import-1793017734074-48-qcd9"
+    },
+    {
       "date": "2026-09-24",
       "description": "Upwork Web App Development",
       "source": "Upwork Client",

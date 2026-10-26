@@ -3,6 +3,7 @@ import { api } from './services/api';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './services/supabaseClient';
 import { FinancialEngine } from './services/financialEngine';
+import { ClientAIAdvisorService } from './services/clientAiAdvisor';
 import {
   UserConsent,
   UserProfile,
@@ -142,14 +143,14 @@ export function App() {
         };
 
         const activeProfile: UserProfile = p || {
-          name: user.user_metadata?.full_name || 'My Account',
-          monthlyIncome: 85000,
-          savingsGoal: 25000,
+          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'My Account',
+          monthlyIncome: 0,
+          savingsGoal: 0,
           riskTolerance: 'moderate',
           investmentHorizonYears: 7,
           emergencyFundTargetMonths: 6,
-          emergencyFundCurrent: 180000,
-          existingInvestments: { equity: 250000, debt: 120000, gold: 60000, cash: 40000 },
+          emergencyFundCurrent: 0,
+          existingInvestments: { equity: 0, debt: 0, gold: 0, cash: 0 },
         };
 
         const activeTx: Transaction[] = tx || [];
@@ -164,12 +165,8 @@ export function App() {
         setBudget(b);
         setPlan(pl);
 
-        try {
-          const ins = await api.getAIInsights();
-          setInsights(ins);
-        } catch {
-          setInsights([]);
-        }
+        const ins = ClientAIAdvisorService.generateQuickInsights(activeConsent, activeProfile, b, pl);
+        setInsights(ins);
       } else {
         // 2. Demo / Offline Fallback (Local API)
         const [c, p, b, pl, tx, ins] = await Promise.all([
@@ -253,6 +250,7 @@ export function App() {
   const handleUploadCSV = async (file: File) => {
     const res = await api.uploadCSV(file);
     if (user && supabase && res.transactions) {
+      let detectedSalary = 0;
       for (const tx of res.transactions) {
         await supabaseService.addTransaction(user.id, {
           date: tx.date,
@@ -264,6 +262,12 @@ export function App() {
           paymentMethod: tx.paymentMethod,
           notes: tx.notes,
         });
+        if (tx.type === 'income' && tx.amount > detectedSalary) {
+          detectedSalary = tx.amount;
+        }
+      }
+      if (detectedSalary > 0 && (!profile || profile.monthlyIncome <= 0)) {
+        await supabaseService.updateProfile(user.id, { monthlyIncome: detectedSalary });
       }
     }
     await refreshAllData();
@@ -284,7 +288,25 @@ export function App() {
     message: string,
     history: { role: 'user' | 'assistant'; content: string }[]
   ) => {
-    return api.chatWithAI(message, history);
+    const liveContext = {
+      consent: consent || undefined,
+      profile: profile || undefined,
+      transactions: transactions || undefined,
+      budget: budget || undefined,
+      plan: plan || undefined,
+    };
+
+    try {
+      const res = await api.chatWithAI(message, history, liveContext);
+      if (res && res.reply) {
+        return res;
+      }
+    } catch (err) {
+      console.warn('API chat failed or timed out, executing live client reasoning engine:', err);
+    }
+
+    // Real-time client reasoning fallback with live user telemetry
+    return ClientAIAdvisorService.chat(message, history, liveContext);
   };
 
   const handleSignOut = async () => {

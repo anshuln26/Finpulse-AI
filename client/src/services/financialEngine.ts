@@ -31,8 +31,6 @@ export class FinancialEngine {
     profile: UserProfile,
     consent: UserConsent
   ): BudgetHealth {
-    const monthlyIncome = consent.shareIncome ? profile.monthlyIncome : 0;
-
     // Filter transactions if consent allows
     const activeTx = consent.shareTransactions ? transactions : [];
 
@@ -53,9 +51,14 @@ export class FinancialEngine {
 
     let totalExpenses = 0;
     let actualInvestmentsFromTx = 0;
+    let totalIncomeFromTx = 0;
+    const monthsSet = new Set<string>();
 
     for (const tx of activeTx) {
-      if (tx.type === 'expense') {
+      if (tx.type === 'income') {
+        totalIncomeFromTx += tx.amount;
+        if (tx.date) monthsSet.add(tx.date.substring(0, 7));
+      } else if (tx.type === 'expense') {
         if (tx.category === 'Investment') {
           actualInvestmentsFromTx += tx.amount;
         } else {
@@ -64,6 +67,14 @@ export class FinancialEngine {
         }
       }
     }
+
+    // Determine effective monthly income:
+    // If profile.monthlyIncome is explicitly set (> 0), use it.
+    // If profile.monthlyIncome is 0, but we have income transactions, compute monthly average.
+    const monthCount = Math.max(1, monthsSet.size);
+    const avgMonthlyIncomeFromTx = totalIncomeFromTx > 0 ? Math.round(totalIncomeFromTx / monthCount) : 0;
+    const resolvedIncome = profile.monthlyIncome > 0 ? profile.monthlyIncome : avgMonthlyIncomeFromTx;
+    const monthlyIncome = consent.shareIncome ? resolvedIncome : 0;
 
     // 50/30/20 breakdown calculation
     let needsAmount = 0;

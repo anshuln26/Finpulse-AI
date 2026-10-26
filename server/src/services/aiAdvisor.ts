@@ -12,9 +12,16 @@ export class AIAdvisorService {
 
   public static async chat(
     userMessage: string,
-    history: { role: 'user' | 'assistant'; content: string }[] = []
+    history: { role: 'user' | 'assistant'; content: string }[] = [],
+    clientContext?: {
+      consent?: UserConsent;
+      profile?: UserProfile;
+      transactions?: Transaction[];
+      budget?: BudgetHealth;
+      plan?: InvestmentPlan;
+    }
   ): Promise<{ response: string; consentFiltered: boolean }> {
-    const consent = db.getConsent();
+    const consent = clientContext?.consent || db.getConsent();
 
     // 1. Consent Gate: Respect user data sovereignty
     if (!consent.aiAdvisoryConsent) {
@@ -27,10 +34,10 @@ export class AIAdvisorService {
       };
     }
 
-    const profile = db.getProfile();
-    const transactions = db.getTransactions();
-    const budgetHealth = FinancialEngine.calculateBudgetHealth(transactions, profile, consent);
-    const investmentPlan = FinancialEngine.generateInvestmentPlan(profile, budgetHealth, consent);
+    const profile = clientContext?.profile || db.getProfile();
+    const transactions = clientContext?.transactions || db.getTransactions();
+    const budgetHealth = clientContext?.budget || FinancialEngine.calculateBudgetHealth(transactions, profile, consent);
+    const investmentPlan = clientContext?.plan || FinancialEngine.generateInvestmentPlan(profile, budgetHealth, consent);
 
     // 2. Build privacy-consented context for LLM
     let contextSummary = '=== USER FINANCIAL TELEMETRY (CONSENT FILTERED) ===\n';

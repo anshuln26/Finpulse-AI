@@ -4,14 +4,14 @@ import { AIAdvisorService } from '../services/aiAdvisor.js';
 export const aiRouter = Router();
 
 aiRouter.post('/chat', async (req, res) => {
-  const { message, history } = req.body;
+  const { message, history, context } = req.body;
 
   if (!message || typeof message !== 'string') {
     return res.status(400).json({ error: 'Message string is required' });
   }
 
   try {
-    const result = await AIAdvisorService.chat(message, history || []);
+    const result = await AIAdvisorService.chat(message, history || [], context);
     res.json({
       success: true,
       reply: result.response,
