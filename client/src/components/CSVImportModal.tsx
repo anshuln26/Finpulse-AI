@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { X, UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, Download } from 'lucide-react';
+import { X, UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, Download, Sparkles } from 'lucide-react';
+import { SYNTHETIC_CSV_DATA } from '../data/syntheticTransactions';
 
 interface CSVImportModalProps {
   isOpen: boolean;
@@ -48,26 +49,35 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
   };
 
   const handleDownloadSample = () => {
-    const csvContent =
-      'Date,Description,Amount,Category,Type,PaymentMethod\n' +
-      '2026-09-01,Monthly Salary Credit,85000,Other,income,Net Banking\n' +
-      '2026-09-02,Apartment Rent,24000,Housing,expense,Net Banking\n' +
-      '2026-09-03,Supermarket Grocery & Zepto,7200,Food & Dining,expense,UPI\n' +
-      '2026-09-05,Electricity & JioFiber,3100,Utilities,expense,UPI\n' +
-      '2026-09-08,Nifty 50 Mutual Fund SIP,12000,Investment,expense,Net Banking\n' +
-      '2026-09-12,Weekend Dining Restaurant,4500,Food & Dining,expense,Credit Card\n' +
-      '2026-09-15,Subscriptions (Netflix & Hotstar),1299,Subscriptions,expense,Credit Card\n' +
-      '2026-09-18,Apollo Pharmacy Medicine,1450,Healthcare,expense,UPI\n' +
-      '2026-09-21,Swiggy Food Delivery,2800,Food & Dining,expense,UPI\n';
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([SYNTHETIC_CSV_DATA], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', 'sample_financial_statement.csv');
+    link.setAttribute('download', 'synthetic_financial_statement.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleLoadSyntheticData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const syntheticBlob = new Blob([SYNTHETIC_CSV_DATA], { type: 'text/csv;charset=utf-8;' });
+      const syntheticFile = new File([syntheticBlob], 'synthetic_financial_statement.csv', { type: 'text/csv' });
+      setFile(syntheticFile);
+      const res = await onUpload(syntheticFile);
+      setResult(res);
+      setTimeout(() => {
+        setFile(null);
+        setResult(null);
+        onClose();
+      }, 1800);
+    } catch (err: any) {
+      setError(err.message || 'Failed to feed synthetic data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -123,19 +133,38 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
           )}
         </div>
 
-        {/* Sample Template & Help */}
-        <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
-          <div className="text-xs text-slate-600 dark:text-slate-300">
-            Need a test template or specific format?
+        {/* Synthetic Dataset & Sample Template */}
+        <div className="mt-4 p-3.5 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent dark:from-emerald-500/15 dark:to-slate-800/60 rounded-xl border border-emerald-500/30 dark:border-emerald-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Realistic Synthetic Dataset (50 Entries)</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Salary, investments, rent, utilities, and dining data pre-configured.
+            </p>
           </div>
-          <button
-            onClick={handleDownloadSample}
-            type="button"
-            className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Download Sample CSV</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleLoadSyntheticData}
+              disabled={loading}
+              type="button"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition disabled:opacity-50"
+              title="Instantly import 50 realistic transactions without file browsing"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Feed Data</span>
+            </button>
+            <button
+              onClick={handleDownloadSample}
+              type="button"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 transition"
+              title="Download synthetic CSV file to your computer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download CSV</span>
+            </button>
+          </div>
         </div>
 
         {/* Status messages */}
