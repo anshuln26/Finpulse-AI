@@ -16,7 +16,7 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ currentTab, onSelectTab }) => {
   const tabs = [
-    { id: 'dashboard' as NavTab, label: 'Overview', icon: LayoutDashboard },
+    { id: 'dashboard' as NavTab, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'expenses' as NavTab, label: 'Expenses', icon: Receipt },
     { id: 'investments' as NavTab, label: 'Investments', icon: TrendingUp },
     { id: 'aichat' as NavTab, label: 'AI Advisor', icon: BotMessageSquare, badge: 'Copilot' },

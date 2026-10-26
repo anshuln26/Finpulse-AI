@@ -362,10 +362,13 @@ export function App() {
               budget={budget}
               profile={profile}
               consent={consent}
+              plan={plan}
               transactions={transactions}
               insights={insights}
               onNavigate={(tab) => setCurrentTab(tab)}
               onOpenAddModal={() => setIsAddModalOpen(true)}
+              onOpenCSVModal={() => setIsCSVModalOpen(true)}
+              onUpdateRiskProfile={handleUpdateRiskProfile}
             />
           </div>
 
