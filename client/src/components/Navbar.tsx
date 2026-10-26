@@ -7,6 +7,8 @@ import {
   UploadCloud,
   Sun,
   Moon,
+  Cloud,
+  LogOut,
 } from 'lucide-react';
 import { UserConsent } from '../types';
 
@@ -17,6 +19,9 @@ interface NavbarProps {
   onOpenAddModal: () => void;
   onOpenCSVModal: () => void;
   onNavigateToConsent: () => void;
+  user: any | null;
+  onOpenAuthModal: () => void;
+  onSignOut: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -26,6 +31,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAddModal,
   onOpenCSVModal,
   onNavigateToConsent,
+  user,
+  onOpenAuthModal,
+  onSignOut,
 }) => {
   const isConsentFullyActive =
     consent?.aiAdvisoryConsent &&
@@ -33,10 +41,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     consent?.shareIncome &&
     consent?.shareInvestments;
 
+  const userDisplayName =
+    user?.user_metadata?.full_name ||
+    user?.email?.split('@')[0] ||
+    'My Account';
+
   return (
     <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-6 lg:px-8 py-2.5 transition-colors">
       <div className="w-full max-w-[1720px] mx-auto flex items-center justify-between">
-        {/* Brand: Clean & Minimal like Groww */}
+        {/* Brand */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">
             <Sparkles className="w-4 h-4 text-white" />
@@ -90,11 +103,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Upload CSV */}
           <button
             onClick={onOpenCSVModal}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition"
             title="Import Bank Statement CSV"
           >
             <UploadCloud className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-            <span className="hidden sm:inline">Import CSV</span>
+            <span>Import CSV</span>
           </button>
 
           {/* Add Transaction Button */}
@@ -105,6 +118,38 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Plus className="w-4 h-4" />
             <span>Add Entry</span>
           </button>
+
+          {/* Supabase Cloud Auth Button */}
+          {user ? (
+            <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-[10px]">
+                  {userDisplayName.charAt(0).toUpperCase()}
+                </div>
+                <span className="font-medium text-slate-700 dark:text-slate-300 max-w-[100px] truncate hidden sm:inline">
+                  {userDisplayName}
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Cloud Sync Active" />
+              </div>
+              <button
+                onClick={onSignOut}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
+                title="Sign Out"
+                aria-label="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuthModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition shadow-sm"
+              title="Sign in with Supabase"
+            >
+              <Cloud className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
+              <span>Sign In</span>
+            </button>
+          )}
         </div>
       </div>
     </header>

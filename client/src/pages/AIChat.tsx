@@ -8,6 +8,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { ChatMessage, UserConsent } from '../types';
+import { FormattedMessage } from '../components/FormattedMessage';
 
 interface AIChatProps {
   consent: UserConsent | null;
@@ -169,13 +170,15 @@ export const AIChat: React.FC<AIChatProps> = ({
               <div
                 className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 text-sm leading-relaxed ${
                   isUser
-                    ? 'bg-emerald-600 text-white rounded-tr-none shadow-sm'
-                    : 'bg-white/95 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border border-teal-200/80 dark:border-slate-700/80 rounded-tl-none whitespace-pre-wrap shadow-xs'
+                    ? 'bg-emerald-600 text-white rounded-tr-none shadow-sm whitespace-pre-wrap'
+                    : 'bg-white/95 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border border-teal-200/80 dark:border-slate-700/80 rounded-tl-none shadow-xs'
                 }`}
               >
-                <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
-                  {m.content}
-                </div>
+                {isUser ? (
+                  <div className="text-sm">{m.content}</div>
+                ) : (
+                  <FormattedMessage content={m.content} />
+                )}
                 <div
                   className={`text-xs mt-2 flex items-center gap-1.5 ${
                     isUser ? 'text-emerald-100 justify-end' : 'text-slate-400'

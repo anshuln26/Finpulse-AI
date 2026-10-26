@@ -78,7 +78,7 @@ export class AIAdvisorService {
 You help users manage household budgets, cut runaway spending (Swiggy, dining, OTT, Amazon impulse buys), optimize savings, and build long-term wealth through disciplined Systematic Investment Plans (SIPs) in Nifty 50 Index funds, PPF, and Sovereign Gold.
 Always express monetary values in Indian Rupees (₹) and use Indian numbering benchmarks (lakhs, crores).
 Answer the user's specific typed question directly, incorporating the exact numbers, math, and calculations from their live context.
-Keep advice practical, encouraging, mathematically accurate, and formatted cleanly using markdown with clear headings, bold metrics, and bullet steps.
+Formatting Rule: Do NOT use markdown symbols such as hashtags (###, ##, #) or asterisks (**, *) for formatting. Write plain, elegant, and readable text. Use clean bullet points (•) and numbers for lists. Never wrap text or numbers in asterisks.
 Adhere strictly to user privacy: only reference financial metrics explicitly permitted in the context below. If data was withheld, note that gracefully without scolding.
 
 ${contextSummary}`;
@@ -97,7 +97,7 @@ ${contextSummary}`;
         });
 
         if (response && response.text && response.text.trim().length > 0) {
-          return { response: response.text, consentFiltered: false };
+          return { response: this.cleanFormatting(response.text), consentFiltered: false };
         }
       } catch (err) {
         console.warn('Gemini API call failed or timed out, activating Natural Language Financial Engine fallback:', err);
@@ -116,9 +116,25 @@ ${contextSummary}`;
     );
 
     return {
-      response: reasoningResponse,
+      response: this.cleanFormatting(reasoningResponse),
       consentFiltered: false,
     };
+  }
+
+  public static cleanFormatting(text: string): string {
+    if (!text) return text;
+    return text
+      // Remove leading markdown hashes on lines (###, ##, #)
+      .replace(/^#{1,6}\s*/gm, '')
+      // Remove double asterisks (**bold**) -> bold text
+      .replace(/\*\*([^*]+?)\*\*/g, '$1')
+      // Remove single asterisks (*italic*) -> italic text
+      .replace(/(^|[^*])\*([^*]+?)\*([^*]|$)/g, '$1$2$3')
+      // Clean up markdown table separators | :--- | :---: | if any
+      .replace(/\|?\s*:\s*-+\s*:\s*\|?/g, '')
+      // Clean any leftover double or single asterisks or hashes
+      .replace(/[*#]/g, '')
+      .trim();
   }
 
   public static async generateQuickInsights(): Promise<
@@ -288,12 +304,12 @@ ${contextSummary}`;
     if (isCutExpenseIntent && (q.includes('expense') || q.includes('spend') || q.includes('budget') || extractedAmount !== null || q.includes('money'))) {
       if (!consent.shareTransactions) {
         return (
-          '📊 **Expense Optimization Guidance (Consent Withheld)**\n\n' +
-          'To generate a precise category-by-category rupee reduction plan, please enable **Share Transactions** in the Consent & Privacy Center.\n\n' +
-          '**General Indian Expense Optimization Principles:**\n' +
-          '1. **Food & Dining Leakage**: Frequent food delivery (Swiggy/Zomato) adds 30–40% in packaging, delivery fees, and surge pricing. Restricting orders to 1–2 times weekly typically saves ₹3,500–₹6,000/month.\n' +
-          '2. **Subscription Audit**: Check credit card & UPI auto-debits for unused OTT or gym apps.\n' +
-          '3. **48-Hour Purchase Delay**: For discretionary shopping on Amazon/Flipkart, place items in your cart and wait 2 days before completing payment.'
+          'Expense Optimization Guidance (Consent Withheld)\n\n' +
+          'To generate a precise category-by-category rupee reduction plan, please enable Share Transactions in the Consent & Privacy Center.\n\n' +
+          'General Indian Expense Optimization Principles:\n' +
+          '1. Food & Dining Leakage: Frequent food delivery (Swiggy/Zomato) adds 30–40% in packaging, delivery fees, and surge pricing. Restricting orders to 1–2 times weekly typically saves ₹3,500–₹6,000/month.\n' +
+          '2. Subscription Audit: Check credit card & UPI auto-debits for unused OTT or gym apps.\n' +
+          '3. 48-Hour Purchase Delay: For discretionary shopping on Amazon/Flipkart, place items in your cart and wait 2 days before completing payment.'
         );
       }
 
@@ -312,15 +328,15 @@ ${contextSummary}`;
       const targetCut = extractedAmount || Math.round(Math.min(totalDiscretionary * 0.25, 5000));
       const targetCutFormatted = '₹' + targetCut.toLocaleString('en-IN');
 
-      let resp = `### 💡 Personalized Plan to Cut ${targetCutFormatted} from Monthly Expenses\n\n`;
-      resp += `Your current total monthly expenditure is **₹${budget.totalExpenses.toLocaleString('en-IN')}**, of which discretionary "Wants" account for **₹${budget.rule50_30_20.wants.amount.toLocaleString('en-IN')} (${budget.rule50_30_20.wants.percentage}%)**.\n\n`;
+      let resp = `💡 Personalized Plan to Cut ${targetCutFormatted} from Monthly Expenses\n\n`;
+      resp += `Your current total monthly expenditure is ₹${budget.totalExpenses.toLocaleString('en-IN')}, of which discretionary "Wants" account for ₹${budget.rule50_30_20.wants.amount.toLocaleString('en-IN')} (${budget.rule50_30_20.wants.percentage}%).\n\n`;
 
       if (totalDiscretionary <= 0) {
         resp += `You currently have zero recorded discretionary expenses. Any cost reduction must come from renegotiating fixed living needs (rent, utilities).\n`;
         return resp;
       }
 
-      resp += `**Recommended Rupee Reduction by Category:**\n`;
+      resp += `Recommended Rupee Reduction by Category:\n`;
 
       // Proportional cut across discretionary categories
       let allocatedCut = 0;
@@ -358,7 +374,7 @@ ${contextSummary}`;
 
       cuts.forEach((c) => {
         if (c.cut > 0) {
-          resp += `- **${c.category}**: Cut **-₹${c.cut.toLocaleString('en-IN')}** (from ₹${c.current.toLocaleString('en-IN')} down to **₹${c.revised.toLocaleString('en-IN')}**)\n  *Strategy:* ${c.tip}\n`;
+          resp += `• ${c.category}: Cut -₹${c.cut.toLocaleString('en-IN')} (from ₹${c.current.toLocaleString('en-IN')} down to ₹${c.revised.toLocaleString('en-IN')})\n  Strategy: ${c.tip}\n`;
         }
       });
 
@@ -368,13 +384,13 @@ ${contextSummary}`;
       const revisedSavingsRate = profile.monthlyIncome > 0 ? Math.round((revisedSurplus / profile.monthlyIncome) * 100) : 0;
       const fiveYearGrowth = this.calculateSIPFutureValue(targetCut, 5, 12);
 
-      resp += `\n**📊 Financial Impact on Your Numbers:**\n`;
-      resp += `- **Monthly Outflow:** Drops from ₹${budget.totalExpenses.toLocaleString('en-IN')} ➔ **₹${revisedTotalExpenses.toLocaleString('en-IN')}**\n`;
-      resp += `- **Net Monthly Surplus:** Expands from ₹${currentSurplus.toLocaleString('en-IN')} ➔ **₹${revisedSurplus.toLocaleString('en-IN')}** (+₹${targetCut.toLocaleString('en-IN')}/mo)\n`;
-      resp += `- **Target Savings Rate:** Improves from **${budget.savingsRate}%** ➔ **${revisedSavingsRate}%** of income\n`;
-      resp += `- **5-Year Compounding Wealth:** Redirecting this saved ₹${targetCut.toLocaleString('en-IN')}/month into a low-cost Nifty 50 Index Fund at 12% CAGR yields approximately **₹${fiveYearGrowth.toLocaleString('en-IN')}** in 5 years!\n\n`;
+      resp += `\n📊 Financial Impact on Your Numbers:\n`;
+      resp += `• Monthly Outflow: Drops from ₹${budget.totalExpenses.toLocaleString('en-IN')} ➔ ₹${revisedTotalExpenses.toLocaleString('en-IN')}\n`;
+      resp += `• Net Monthly Surplus: Expands from ₹${currentSurplus.toLocaleString('en-IN')} ➔ ₹${revisedSurplus.toLocaleString('en-IN')} (+₹${targetCut.toLocaleString('en-IN')}/mo)\n`;
+      resp += `• Target Savings Rate: Improves from ${budget.savingsRate}% ➔ ${revisedSavingsRate}% of income\n`;
+      resp += `• 5-Year Compounding Wealth: Redirecting this saved ₹${targetCut.toLocaleString('en-IN')}/month into a low-cost Nifty 50 Index Fund at 12% CAGR yields approximately ₹${fiveYearGrowth.toLocaleString('en-IN')} in 5 years!\n\n`;
 
-      resp += `**Actionable Execution:** Set up an auto-debit SIP on salary day (e.g. 5th of every month) for this saved amount so you invest first and spend only what remains.`;
+      resp += `Actionable Execution: Set up an auto-debit SIP on salary day (e.g. 5th of every month) for this saved amount so you invest first and spend only what remains.`;
       return resp;
     }
 
@@ -401,24 +417,24 @@ ${contextSummary}`;
       const monthlyEssential = budget.rule50_30_20.needs.amount > 0 ? budget.rule50_30_20.needs.amount : Math.round((profile.monthlyIncome || 60000) * 0.5);
       const currentRunway = Number((emergencyReserve / (monthlyEssential || 1)).toFixed(1));
 
-      let resp = `### 🔍 Affordability Assessment for ₹${itemCost.toLocaleString('en-IN')}\n\n`;
+      let resp = `🔍 Affordability Assessment for ₹${itemCost.toLocaleString('en-IN')}\n\n`;
 
-      resp += `**Your Financial Baseline:**\n`;
-      resp += `- **Monthly Net Surplus:** ₹${monthlySurplus.toLocaleString('en-IN')}\n`;
-      resp += `- **Liquid Emergency Reserve:** ₹${emergencyReserve.toLocaleString('en-IN')} (${currentRunway} months buffer)\n`;
-      resp += `- **Monthly Essential Expenses:** ₹${monthlyEssential.toLocaleString('en-IN')}\n\n`;
+      resp += `Your Financial Baseline:\n`;
+      resp += `• Monthly Net Surplus: ₹${monthlySurplus.toLocaleString('en-IN')}\n`;
+      resp += `• Liquid Emergency Reserve: ₹${emergencyReserve.toLocaleString('en-IN')} (${currentRunway} months buffer)\n`;
+      resp += `• Monthly Essential Expenses: ₹${monthlyEssential.toLocaleString('en-IN')}\n\n`;
 
       // Option A: Paying from Emergency Fund (Lump sum)
       const postReserve = emergencyReserve - itemCost;
       const postRunway = Number((postReserve / (monthlyEssential || 1)).toFixed(1));
 
-      resp += `**Scenario 1: Dipping into Existing Reserves (Lump Sum)**\n`;
+      resp += `Scenario 1: Dipping into Existing Reserves (Lump Sum)\n`;
       if (postReserve < 0) {
-        resp += `❌ **Not Feasible with Cash:** Item cost exceeds your entire emergency reserve by ₹${Math.abs(postReserve).toLocaleString('en-IN')}.\n\n`;
+        resp += `❌ Not Feasible with Cash: Item cost exceeds your entire emergency reserve by ₹${Math.abs(postReserve).toLocaleString('en-IN')}.\n\n`;
       } else if (postRunway < 5) {
-        resp += `⚠️ **High Risk:** Paying ₹${itemCost.toLocaleString('en-IN')} in cash drops your emergency runway from **${currentRunway} months down to ${postRunway} months** (below the safe Indian benchmark of ≥ 5 months). Any sudden job disruption or medical event would risk debt.\n\n`;
+        resp += `⚠️ High Risk: Paying ₹${itemCost.toLocaleString('en-IN')} in cash drops your emergency runway from ${currentRunway} months down to ${postRunway} months (below the safe Indian benchmark of ≥ 5 months). Any sudden job disruption or medical event would risk debt.\n\n`;
       } else {
-        resp += `✅ **Buffer Remains Healthy:** Your runway would remain at **${postRunway} months** (≥ 5 months buffer). However, replenishing this reserve should take immediate priority.\n\n`;
+        resp += `✅ Buffer Remains Healthy: Your runway would remain at ${postRunway} months (≥ 5 months buffer). However, replenishing this reserve should take immediate priority.\n\n`;
       }
 
       // Option B: Funding from Monthly Surplus (Disciplined Path)
@@ -428,20 +444,20 @@ ${contextSummary}`;
         const monthsNeededWith50 = Math.ceil(itemCost / dedicatedSurplus);
         const monthsNeededWith100 = Math.ceil(itemCost / monthlySurplus);
 
-        resp += `**Scenario 2: Sinking Fund via Monthly Surplus (Recommended)**\n`;
-        resp += `- By routing **50% of your surplus (₹${dedicatedSurplus.toLocaleString('en-IN')}/mo)** into an auto sweep-in FD or overnight fund, you can purchase this in **${monthsNeededWith50} months** completely debt-free without touching emergency savings or pausing your mutual fund SIPs!\n`;
-        resp += `- If you route **100% of your surplus (₹${monthlySurplus.toLocaleString('en-IN')}/mo)**, you can purchase it in **${monthsNeededWith100} month(s)**.\n\n`;
+        resp += `Scenario 2: Sinking Fund via Monthly Surplus (Recommended)\n`;
+        resp += `• By routing 50% of your surplus (₹${dedicatedSurplus.toLocaleString('en-IN')}/mo) into an auto sweep-in FD or overnight fund, you can purchase this in ${monthsNeededWith50} months completely debt-free without touching emergency savings or pausing your mutual fund SIPs!\n`;
+        resp += `• If you route 100% of your surplus (₹${monthlySurplus.toLocaleString('en-IN')}/mo), you can purchase it in ${monthsNeededWith100} month(s).\n\n`;
       } else {
-        resp += `**Scenario 2: Sinking Fund:** You currently have zero monthly surplus. You must first trim discretionary expenses before taking on this cost.\n\n`;
+        resp += `Scenario 2: Sinking Fund: You currently have zero monthly surplus. You must first trim discretionary expenses before taking on this cost.\n\n`;
       }
 
-      resp += `**FinPulse Verdict:** `;
+      resp += `FinPulse Verdict: `;
       if (monthlySurplus >= itemCost * 0.5 && currentRunway >= 5) {
-        resp += `🟢 **Comfortably Affordable** with 2–3 months of disciplined sinking fund planning. Avoid No-Cost EMI credit card traps that lock up future cash flow.`;
+        resp += `🟢 Comfortably Affordable with 2–3 months of disciplined sinking fund planning. Avoid No-Cost EMI credit card traps that lock up future cash flow.`;
       } else if (currentRunway >= 5) {
-        resp += `🟡 **Affordable with Staged Savings.** Save via a dedicated 3 to 6-month recurring deposit before buying.`;
+        resp += `🟡 Affordable with Staged Savings. Save via a dedicated 3 to 6-month recurring deposit before buying.`;
       } else {
-        resp += `🔴 **Not Recommended Right Now.** Secure your 5–6 month emergency cushion (currently ${currentRunway} mo) first before committing to this discretionary purchase.`;
+        resp += `🔴 Not Recommended Right Now. Secure your 5–6 month emergency cushion (currently ${currentRunway} mo) first before committing to this discretionary purchase.`;
       }
 
       return resp;
@@ -467,21 +483,21 @@ ${contextSummary}`;
       const surplus = budget.netSavings;
       const postSurplus = surplus - proposedEMI;
 
-      let resp = `### 💳 EMI Feasibility Analysis for ₹${proposedEMI.toLocaleString('en-IN')}/month\n\n`;
+      let resp = `💳 EMI Feasibility Analysis for ₹${proposedEMI.toLocaleString('en-IN')}/month\n\n`;
 
-      resp += `**Debt Metrics & Banking Ratios:**\n`;
-      resp += `- **Monthly Net Income:** ₹${income.toLocaleString('en-IN')}\n`;
-      resp += `- **Existing Debt/EMI Payments:** ₹${currentDebt.toLocaleString('en-IN')}\n`;
-      resp += `- **Proposed New Total EMI:** ₹${totalPostEMI.toLocaleString('en-IN')}\n`;
-      resp += `- **FOIR (Fixed Obligation to Income Ratio):** **${foir}%** (Prudent Indian Banking Limit is ≤ 35%)\n`;
-      resp += `- **Impact on Monthly Surplus:** Reduces surplus from ₹${surplus.toLocaleString('en-IN')} ➔ **₹${postSurplus.toLocaleString('en-IN')}**\n\n`;
+      resp += `Debt Metrics & Banking Ratios:\n`;
+      resp += `• Monthly Net Income: ₹${income.toLocaleString('en-IN')}\n`;
+      resp += `• Existing Debt/EMI Payments: ₹${currentDebt.toLocaleString('en-IN')}\n`;
+      resp += `• Proposed New Total EMI: ₹${totalPostEMI.toLocaleString('en-IN')}\n`;
+      resp += `• FOIR (Fixed Obligation to Income Ratio): ${foir}% (Prudent Indian Banking Limit is ≤ 35%)\n`;
+      resp += `• Impact on Monthly Surplus: Reduces surplus from ₹${surplus.toLocaleString('en-IN')} ➔ ₹${postSurplus.toLocaleString('en-IN')}\n\n`;
 
       if (postSurplus < 0) {
-        resp += `🚨 **Critical Risk:** This EMI would trigger a **monthly deficit of -₹${Math.abs(postSurplus).toLocaleString('en-IN')}**, pushing you into high-interest revolving credit debt. Do NOT proceed with this loan without either increasing your down payment or extending the tenure.`;
+        resp += `🚨 Critical Risk: This EMI would trigger a monthly deficit of -₹${Math.abs(postSurplus).toLocaleString('en-IN')}, pushing you into high-interest revolving credit debt. Do NOT proceed with this loan without either increasing your down payment or extending the tenure.`;
       } else if (foir > 40) {
-        resp += `⚠️ **High Debt Burden:** At ${foir}% FOIR, your loan obligations exceed prudent thresholds. It will severely crowd out your mutual fund SIPs and emergency cushion contributions.`;
+        resp += `⚠️ High Debt Burden: At ${foir}% FOIR, your loan obligations exceed prudent thresholds. It will severely crowd out your mutual fund SIPs and emergency cushion contributions.`;
       } else {
-        resp += `✅ **Safe & Manageable:** Your FOIR remains healthy at **${foir}%** (well below the 35% ceiling), leaving a residual monthly buffer of **₹${postSurplus.toLocaleString('en-IN')}**. Ensure you maintain at least 6 months of EMI payments in your liquid emergency fund.`;
+        resp += `✅ Safe & Manageable: Your FOIR remains healthy at ${foir}% (well below the 35% ceiling), leaving a residual monthly buffer of ₹${postSurplus.toLocaleString('en-IN')}. Ensure you maintain at least 6 months of EMI payments in your liquid emergency fund.`;
       }
 
       return resp;
@@ -512,22 +528,20 @@ ${contextSummary}`;
       const equityAggressive = this.calculateSIPFutureValue(monthlySIP, years, 15);
       const ppfDebt = this.calculateSIPFutureValue(monthlySIP, years, 7.1);
 
-      let resp = `### 🚀 SIP Wealth Projection: ₹${monthlySIP.toLocaleString('en-IN')}/mo over ${years} Years\n\n`;
-      resp += `If you consistently invest **₹${monthlySIP.toLocaleString('en-IN')} per month** for **${years} years** (${years * 12} installments), your total capital outlay will be **₹${totalInvested.toLocaleString('en-IN')}**.\n\n`;
+      let resp = `🚀 SIP Wealth Projection: ₹${monthlySIP.toLocaleString('en-IN')}/mo over ${years} Years\n\n`;
+      resp += `If you consistently invest ₹${monthlySIP.toLocaleString('en-IN')} per month for ${years} years (${years * 12} installments), your total capital outlay will be ₹${totalInvested.toLocaleString('en-IN')}.\n\n`;
 
-      resp += `**Projected Maturity Corpus across Indian Asset Classes:**\n\n`;
-      resp += `| Vehicle / Asset Class | Expected CAGR | Total Invested | Estimated Corpus | Wealth Multiplier |\n`;
-      resp += `| :--- | :---: | :---: | :---: | :---: |\n`;
-      resp += `| **PPF / Sovereign Debt** | 7.1% | ₹${totalInvested.toLocaleString('en-IN')} | **₹${ppfDebt.toLocaleString('en-IN')}** | ${(ppfDebt / totalInvested).toFixed(1)}x |\n`;
-      resp += `| **Nifty 50 Index Fund** | 13.0% | ₹${totalInvested.toLocaleString('en-IN')} | **₹${equityNifty50.toLocaleString('en-IN')}** | **${(equityNifty50 / totalInvested).toFixed(1)}x** |\n`;
-      resp += `| **Flexi Cap / Midcap Active** | 15.0% | ₹${totalInvested.toLocaleString('en-IN')} | **₹${equityAggressive.toLocaleString('en-IN')}** | ${(equityAggressive / totalInvested).toFixed(1)}x |\n\n`;
+      resp += `Projected Maturity Corpus across Indian Asset Classes:\n`;
+      resp += `• PPF / Sovereign Debt (7.1%): ₹${ppfDebt.toLocaleString('en-IN')} (${(ppfDebt / totalInvested).toFixed(1)}x returns)\n`;
+      resp += `• Nifty 50 Index Fund (13.0%): ₹${equityNifty50.toLocaleString('en-IN')} (${(equityNifty50 / totalInvested).toFixed(1)}x returns)\n`;
+      resp += `• Flexi Cap / Midcap Active (15.0%): ₹${equityAggressive.toLocaleString('en-IN')} (${(equityAggressive / totalInvested).toFixed(1)}x returns)\n\n`;
 
       const wealthCreated = equityNifty50 - totalInvested;
-      resp += `**💡 The Power of Disciplined Indian Equities:**\n`;
-      resp += `- Pure Compound Growth Gain: **+₹${wealthCreated.toLocaleString('en-IN')}** created purely by compounding in a broad Nifty 50 Index fund.\n`;
-      resp += `- **Step-up SIP Hack:** If you increase your SIP by just **10% annually** as your salary grows, your final corpus will nearly **double** to approx. **₹${Math.round(equityNifty50 * 1.65).toLocaleString('en-IN')}**!\n\n`;
+      resp += `💡 The Power of Disciplined Indian Equities:\n`;
+      resp += `• Pure Compound Growth Gain: +₹${wealthCreated.toLocaleString('en-IN')} created purely by compounding in a broad Nifty 50 Index fund.\n`;
+      resp += `• Step-up SIP Hack: If you increase your SIP by just 10% annually as your salary grows, your final corpus will nearly double to approx. ₹${Math.round(equityNifty50 * 1.65).toLocaleString('en-IN')}!\n\n`;
 
-      resp += `**Actionable Suggestion:** Start with low-cost direct plans (e.g. UTI Nifty 50 Index Direct or HDFC Index Fund) with 0.15% expense ratio to save on intermediary commissions.`;
+      resp += `Actionable Suggestion: Start with low-cost direct plans (e.g. UTI Nifty 50 Index Direct or HDFC Index Fund) with 0.15% expense ratio to save on intermediary commissions.`;
       return resp;
     }
 
@@ -556,16 +570,16 @@ ${contextSummary}`;
       else if (months < 5) tierBadge = '🟡 Moderate Buffer (2–4 Months)';
       else tierBadge = '🟢 Healthy Cushion (≥ 5 Months Buffer)';
 
-      let resp = `### 🛡️ Emergency Safety Cushion & Runway Analysis\n\n`;
-      resp += `**Current Reserve Status:** ${tierBadge}\n\n`;
-      resp += `- **Liquid Emergency Reserve:** ₹${current.toLocaleString('en-IN')}\n`;
-      resp += `- **Monthly Essential Living Needs:** ₹${essential.toLocaleString('en-IN')}/month\n`;
-      resp += `- **Runway Months Covered:** **${months} months** (Target: 6 months = ₹${target.toLocaleString('en-IN')})\n`;
-      resp += `- **Buffer Condition:** ${months >= 5 ? '✅ Solid Cushion protecting your equities from panic liquidation' : '⚠️ Shortfall of ₹' + shortfall.toLocaleString('en-IN')}\n\n`;
+      let resp = `🛡️ Emergency Safety Cushion & Runway Analysis\n\n`;
+      resp += `Current Reserve Status: ${tierBadge}\n\n`;
+      resp += `• Liquid Emergency Reserve: ₹${current.toLocaleString('en-IN')}\n`;
+      resp += `• Monthly Essential Living Needs: ₹${essential.toLocaleString('en-IN')}/month\n`;
+      resp += `• Runway Months Covered: ${months} months (Target: 6 months = ₹${target.toLocaleString('en-IN')})\n`;
+      resp += `• Buffer Condition: ${months >= 5 ? '✅ Solid Cushion protecting your equities from panic liquidation' : '⚠️ Shortfall of ₹' + shortfall.toLocaleString('en-IN')}\n\n`;
 
-      resp += `**Where to Park Emergency Reserves in India for Zero Penalty & Instant Liquidity:**\n`;
-      resp += `1. **Auto Sweep-in Savings Account (30%)**: Auto-transfers excess balance into 6.5–7.0% FDs while maintaining instant UPI/ATM withdrawal access without breakage penalty.\n`;
-      resp += `2. **Overnight / Liquid Mutual Funds (Direct Plan) (70%)**: Features SEBI-mandated instant redemption of up to ₹50,000/day into your bank account within 30 minutes, with no lock-in.`;
+      resp += `Where to Park Emergency Reserves in India for Zero Penalty & Instant Liquidity:\n`;
+      resp += `1. Auto Sweep-in Savings Account (30%): Auto-transfers excess balance into 6.5–7.0% FDs while maintaining instant UPI/ATM withdrawal access without breakage penalty.\n`;
+      resp += `2. Overnight / Liquid Mutual Funds (Direct Plan) (70%): Features SEBI-mandated instant redemption of up to ₹50,000/day into your bank account within 30 minutes, with no lock-in.`;
 
       return resp;
     }
@@ -598,21 +612,21 @@ ${contextSummary}`;
         const percentOfExpenses = budget.totalExpenses > 0 ? Math.round((totalSpent / budget.totalExpenses) * 100) : 0;
         const percentOfIncome = profile.monthlyIncome > 0 ? Math.round((totalSpent / profile.monthlyIncome) * 100) : 0;
 
-        let resp = `### 🧾 Spending Audit: ${m.name}\n\n`;
-        resp += `- **Total Spent this Month:** **₹${totalSpent.toLocaleString('en-IN')}**\n`;
-        resp += `- **Share of Monthly Expenses:** **${percentOfExpenses}%**\n`;
-        resp += `- **Share of Monthly Income:** **${percentOfIncome}%**\n`;
-        resp += `- **Total Recorded Transactions:** ${matchingTx.length}\n\n`;
+        let resp = `🧾 Spending Audit: ${m.name}\n\n`;
+        resp += `• Total Spent this Month: ₹${totalSpent.toLocaleString('en-IN')}\n`;
+        resp += `• Share of Monthly Expenses: ${percentOfExpenses}%\n`;
+        resp += `• Share of Monthly Income: ${percentOfIncome}%\n`;
+        resp += `• Total Recorded Transactions: ${matchingTx.length}\n\n`;
 
         if (matchingTx.length > 0) {
-          resp += `**Itemized Transactions:**\n`;
+          resp += `Itemized Transactions:\n`;
           matchingTx.forEach((tx) => {
-            resp += `- **${tx.date}**: ${tx.description} ➔ **-₹${tx.amount.toLocaleString('en-IN')}** (${tx.paymentMethod})\n`;
+            resp += `• ${tx.date}: ${tx.description} ➔ -₹${tx.amount.toLocaleString('en-IN')} (${tx.paymentMethod})\n`;
           });
           resp += `\n`;
         }
 
-        resp += `**Copilot Recommendation:** `;
+        resp += `Copilot Recommendation: `;
         if (percentOfIncome > 15) {
           resp += `This category is consuming a disproportionate share (${percentOfIncome}%) of your salary. Trimming orders by 20% would free up ~₹${Math.round(totalSpent * 0.2).toLocaleString('en-IN')}/mo to boost your SIP.`;
         } else {
@@ -628,18 +642,18 @@ ${contextSummary}`;
     // e.g., "What are my highest expenses?", "Where is my money going?", "Top expenses"
     // -----------------------------------------------------------------------
     if (q.includes('highest') || q.includes('top expense') || q.includes('biggest') || q.includes('where is my money going')) {
-      let resp = `### 📊 Your Top Monthly Expenses Breakdown\n\n`;
-      resp += `You have spent **₹${budget.totalExpenses.toLocaleString('en-IN')}** across ${budget.categories.length} categories this month:\n\n`;
+      let resp = `📊 Your Top Monthly Expenses Breakdown\n\n`;
+      resp += `You have spent ₹${budget.totalExpenses.toLocaleString('en-IN')} across ${budget.categories.length} categories this month:\n\n`;
 
       budget.categories.forEach((c, idx) => {
         const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '•';
-        resp += `${medal} **${c.category}**: **₹${c.amount.toLocaleString('en-IN')}** (${c.percentage}% of expenses)\n`;
+        resp += `${medal} ${c.category}: ₹${c.amount.toLocaleString('en-IN')} (${c.percentage}% of expenses)\n`;
       });
 
       if (budget.overspendingAlerts.length > 0) {
-        resp += `\n**⚠️ Active Anomaly Alerts Detected:**\n`;
+        resp += `\n⚠️ Active Anomaly Alerts Detected:\n`;
         budget.overspendingAlerts.forEach((a) => {
-          resp += `- **${a.category}**: ${a.message}\n`;
+          resp += `• ${a.category}: ${a.message}\n`;
         });
       }
 
@@ -656,25 +670,25 @@ ${contextSummary}`;
       const idealWants = Math.round(income * 0.3);
       const idealSavings = Math.round(income * 0.2);
 
-      let resp = `### 📐 The 50/30/20 Budget Breakdown for Your ₹${income.toLocaleString('en-IN')} Salary\n\n`;
+      let resp = `📐 The 50/30/20 Budget Breakdown for Your ₹${income.toLocaleString('en-IN')} Salary\n\n`;
       resp += `The 50/30/20 framework splits your net income into three disciplined buckets:\n\n`;
 
-      resp += `1. **Essential Needs (Target: 50% = ₹${idealNeeds.toLocaleString('en-IN')}):**\n`;
-      resp += `   - **Your Status:** ₹${budget.rule50_30_20.needs.amount.toLocaleString('en-IN')} (**${budget.rule50_30_20.needs.percentage}%**)\n`;
-      resp += `   - Covers housing rent, groceries, electricity bills, transit, and loan EMIs.\n\n`;
+      resp += `1. Essential Needs (Target: 50% = ₹${idealNeeds.toLocaleString('en-IN')}):\n`;
+      resp += `   • Your Status: ₹${budget.rule50_30_20.needs.amount.toLocaleString('en-IN')} (${budget.rule50_30_20.needs.percentage}%)\n`;
+      resp += `   • Covers housing rent, groceries, electricity bills, transit, and loan EMIs.\n\n`;
 
-      resp += `2. **Discretionary Wants (Target: 30% = ₹${idealWants.toLocaleString('en-IN')}):**\n`;
-      resp += `   - **Your Status:** ₹${budget.rule50_30_20.wants.amount.toLocaleString('en-IN')} (**${budget.rule50_30_20.wants.percentage}%**)\n`;
-      resp += `   - Covers dining out, weekend social outings, shopping, and OTT subscriptions.\n\n`;
+      resp += `2. Discretionary Wants (Target: 30% = ₹${idealWants.toLocaleString('en-IN')}):\n`;
+      resp += `   • Your Status: ₹${budget.rule50_30_20.wants.amount.toLocaleString('en-IN')} (${budget.rule50_30_20.wants.percentage}%)\n`;
+      resp += `   • Covers dining out, weekend social outings, shopping, and OTT subscriptions.\n\n`;
 
-      resp += `3. **Savings & Wealth Accumulation (Target: 20% = ₹${idealSavings.toLocaleString('en-IN')}):**\n`;
-      resp += `   - **Your Status:** ₹${budget.rule50_30_20.savings.amount.toLocaleString('en-IN')} (**${budget.rule50_30_20.savings.percentage}%**)\n`;
-      resp += `   - Dedicated to building your liquid emergency runway and monthly index SIPs.\n\n`;
+      resp += `3. Savings & Wealth Accumulation (Target: 20% = ₹${idealSavings.toLocaleString('en-IN')}):\n`;
+      resp += `   • Your Status: ₹${budget.rule50_30_20.savings.amount.toLocaleString('en-IN')} (${budget.rule50_30_20.savings.percentage}%)\n`;
+      resp += `   • Dedicated to building your liquid emergency runway and monthly index SIPs.\n\n`;
 
       if (budget.rule50_30_20.savings.percentage >= 20) {
-        resp += `✨ **Status:** You are outperforming the benchmark 20% savings target! Keep channeling your surplus into compounding assets.`;
+        resp += `✨ Status: You are outperforming the benchmark 20% savings target! Keep channeling your surplus into compounding assets.`;
       } else {
-        resp += `⚠️ **Status:** Your savings rate is below the 20% target. Cutting ~₹${Math.max(0, idealSavings - budget.netSavings).toLocaleString('en-IN')} from Wants will align your budget.`;
+        resp += `⚠️ Status: Your savings rate is below the 20% target. Cutting ~₹${Math.max(0, idealSavings - budget.netSavings).toLocaleString('en-IN')} from Wants will align your budget.`;
       }
 
       return resp;
@@ -688,21 +702,21 @@ ${contextSummary}`;
     if (q.includes('invest') || q.includes('portfolio') || q.includes('nifty') || q.includes('ppf') || q.includes('stocks') || q.includes('gold')) {
       const monthlyDeploy = extractedAmount || plan.recommendedMonthlyInvestment || 15000;
 
-      let resp = `### 📈 Personalized Investment Allocation (${plan.riskProfile.toUpperCase()} Profile)\n\n`;
-      resp += `For your **${plan.riskProfile}** risk tolerance with a **${profile.investmentHorizonYears}-year horizon**, we recommend deploying **₹${monthlyDeploy.toLocaleString('en-IN')}/month** as follows:\n\n`;
+      let resp = `📈 Personalized Investment Allocation (${plan.riskProfile.toUpperCase()} Profile)\n\n`;
+      resp += `For your ${plan.riskProfile} risk tolerance with a ${profile.investmentHorizonYears}-year horizon, we recommend deploying ₹${monthlyDeploy.toLocaleString('en-IN')}/month as follows:\n\n`;
 
       const eqAmt = Math.round((monthlyDeploy * plan.recommendedAllocation.equity) / 100);
       const debtAmt = Math.round((monthlyDeploy * plan.recommendedAllocation.debt) / 100);
       const goldAmt = Math.round((monthlyDeploy * plan.recommendedAllocation.gold) / 100);
       const cashAmt = Math.round((monthlyDeploy * plan.recommendedAllocation.cash) / 100);
 
-      resp += `- 🏛️ **Equities (${plan.recommendedAllocation.equity}% ➔ ₹${eqAmt.toLocaleString('en-IN')}/mo):** Low-cost Nifty 50 Index Fund Direct Plan (e.g. UTI/HDFC) for compounding at 12–14% CAGR.\n`;
-      resp += `- 🛡️ **Debt & Fixed Income (${plan.recommendedAllocation.debt}% ➔ ₹${debtAmt.toLocaleString('en-IN')}/mo):** Public Provident Fund (PPF, 7.1% tax-exempt EEE) or Corporate Bond Fund for capital preservation.\n`;
-      resp += `- 🪙 **Gold (${plan.recommendedAllocation.gold}% ➔ ₹${goldAmt.toLocaleString('en-IN')}/mo):** Sovereign Gold Bonds (SGB) or Nippon India Gold BeES for geopolitical and rupee inflation hedging.\n`;
-      resp += `- 💧 **Liquid Buffer (${plan.recommendedAllocation.cash}% ➔ ₹${cashAmt.toLocaleString('en-IN')}/mo):** High-yield sweep-in FD or Liquid Mutual Fund for short-term liquidity.\n\n`;
+      resp += `• 🏛️ Equities (${plan.recommendedAllocation.equity}% ➔ ₹${eqAmt.toLocaleString('en-IN')}/mo): Low-cost Nifty 50 Index Fund Direct Plan (e.g. UTI/HDFC) for compounding at 12–14% CAGR.\n`;
+      resp += `• 🛡️ Debt & Fixed Income (${plan.recommendedAllocation.debt}% ➔ ₹${debtAmt.toLocaleString('en-IN')}/mo): Public Provident Fund (PPF, 7.1% tax-exempt EEE) or Corporate Bond Fund for capital preservation.\n`;
+      resp += `• 🪙 Gold (${plan.recommendedAllocation.gold}% ➔ ₹${goldAmt.toLocaleString('en-IN')}/mo): Sovereign Gold Bonds (SGB) or Nippon India Gold BeES for geopolitical and rupee inflation hedging.\n`;
+      resp += `• 💧 Liquid Buffer (${plan.recommendedAllocation.cash}% ➔ ₹${cashAmt.toLocaleString('en-IN')}/mo): High-yield sweep-in FD or Liquid Mutual Fund for short-term liquidity.\n\n`;
 
       if (plan.emergencyFundHealth.monthsCovered < 5) {
-        resp += `⚠️ **Important Precondition:** Your emergency cushion is currently at ${plan.emergencyFundHealth.monthsCovered} months (healthy is ≥ 5 mo). Allocate ₹${Math.min(5000, plan.emergencyFundHealth.shortfall).toLocaleString('en-IN')}/mo towards your emergency fund first before aggressive equity exposure.`;
+        resp += `⚠️ Important Precondition: Your emergency cushion is currently at ${plan.emergencyFundHealth.monthsCovered} months (healthy is ≥ 5 mo). Allocate ₹${Math.min(5000, plan.emergencyFundHealth.shortfall).toLocaleString('en-IN')}/mo towards your emergency fund first before aggressive equity exposure.`;
       }
 
       return resp;
@@ -712,20 +726,20 @@ ${contextSummary}`;
     // DEFAULT INTENT: Contextual Financial Q&A / Summary
     // -----------------------------------------------------------------------
     return (
-      `### 🙏 Namaste! FinPulse AI Financial Copilot\n\n` +
+      `🙏 Namaste! FinPulse AI Financial Copilot\n\n` +
       `Here is your real-time financial telemetry based on your live account data:\n\n` +
-      `- **Monthly Net Income:** ${consent.shareIncome ? '₹' + profile.monthlyIncome.toLocaleString('en-IN') : '[Consent Withheld]'}\n` +
-      `- **Monthly Expenses:** ${consent.shareTransactions ? '₹' + budget.totalExpenses.toLocaleString('en-IN') : '[Consent Withheld]'}\n` +
-      `- **Net Monthly Surplus:** ${consent.shareIncome && consent.shareTransactions ? '₹' + budget.netSavings.toLocaleString('en-IN') + ' (' + budget.savingsRate + '% savings rate)' : '[Consent Withheld]'}\n` +
-      `- **Emergency Runway:** ${consent.shareInvestments ? plan.emergencyFundHealth.monthsCovered + ' months (₹' + plan.emergencyFundHealth.current.toLocaleString('en-IN') + ')' : '[Consent Withheld]'}\n` +
-      `- **Risk Profile:** ${consent.shareInvestments ? plan.riskProfile.toUpperCase() : '[Consent Withheld]'}\n\n` +
-      `**You can ask me specific questions like:**\n` +
-      `- *"Where can I cut ₹5,000 from my monthly expenses?"*\n` +
-      `- *"Can I afford a ₹50,000 vacation without hurting my savings?"*\n` +
-      `- *"Can I afford a car EMI of ₹15,000?"*\n` +
-      `- *"How much will a ₹10,000 monthly SIP grow to in 10 years?"*\n` +
-      `- *"How much did I spend on Swiggy and dining out?"*\n` +
-      `- *"Is my emergency fund sufficient for 6 months?"*`
+      `• Monthly Net Income: ${consent.shareIncome ? '₹' + profile.monthlyIncome.toLocaleString('en-IN') : '[Consent Withheld]'}\n` +
+      `• Monthly Expenses: ${consent.shareTransactions ? '₹' + budget.totalExpenses.toLocaleString('en-IN') : '[Consent Withheld]'}\n` +
+      `• Net Monthly Surplus: ${consent.shareIncome && consent.shareTransactions ? '₹' + budget.netSavings.toLocaleString('en-IN') + ' (' + budget.savingsRate + '% savings rate)' : '[Consent Withheld]'}\n` +
+      `• Emergency Runway: ${consent.shareInvestments ? plan.emergencyFundHealth.monthsCovered + ' months (₹' + plan.emergencyFundHealth.current.toLocaleString('en-IN') + ')' : '[Consent Withheld]'}\n` +
+      `• Risk Profile: ${consent.shareInvestments ? plan.riskProfile.toUpperCase() : '[Consent Withheld]'}\n\n` +
+      `You can ask me specific questions like:\n` +
+      `• Where can I cut ₹5,000 from my monthly expenses?\n` +
+      `• Can I afford a ₹50,000 vacation without hurting my savings?\n` +
+      `• Can I afford a car EMI of ₹15,000?\n` +
+      `• How much will a ₹10,000 monthly SIP grow to in 10 years?\n` +
+      `• How much did I spend on Swiggy and dining out?\n` +
+      `• Is my emergency fund sufficient for 6 months?`
     );
   }
 }

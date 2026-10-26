@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from './services/api';
+import { supabaseService } from './services/supabaseService';
+import { supabase } from './services/supabaseClient';
+import { FinancialEngine } from './services/financialEngine';
 import {
   UserConsent,
   UserProfile,
@@ -15,6 +18,7 @@ import { Navigation, NavTab } from './components/Navigation';
 import { ConsentBanner } from './components/ConsentBanner';
 import { AddTransactionModal } from './components/AddTransactionModal';
 import { CSVImportModal } from './components/CSVImportModal';
+import { AuthModal } from './components/AuthModal';
 import { Dashboard } from './pages/Dashboard';
 import { Expenses } from './pages/Expenses';
 import { Investments } from './pages/Investments';
@@ -25,7 +29,7 @@ const INITIAL_CHAT_MESSAGE: ChatMessage = {
   id: 'init-1',
   role: 'assistant',
   content:
-    '🙏 **Namaste! I am FinPulse AI**, your consent-governed personal financial recommender tailored for the Indian market.\n\n' +
+    '🙏 Namaste! I am FinPulse AI, your consent-governed personal financial recommender tailored for the Indian market.\n\n' +
     'I can help you audit household expenses, cut spend leakages (Swiggy, dining, OTT), calculate emergency runway, and tailor an optimal asset allocation (Nifty 50 Index funds, PPF, Sovereign Gold).\n\n' +
     'How can I help optimize your wealth today?',
   timestamp: 'Just now',
@@ -41,13 +45,23 @@ export function App() {
   const [insights, setInsights] = useState<AIInsight[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // User Auth State (Supabase)
+  const [user, setUser] = useState<any>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToastMessage({ message, type });
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
   // Theme state: defaults to dark
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('finpulse_theme');
     return (saved as 'light' | 'dark') || 'dark';
   });
 
-  // Chat conversation state: persisted across tab switches and page refreshes
+  // Chat conversation state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
     try {
       const saved = localStorage.getItem('finpulse_chat_history');
@@ -91,30 +105,95 @@ export function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
 
-  // Fetch all core data
+  // Sync Supabase Auth State
+  useEffect(() => {
+    if (!supabase) return;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch all core data (Cloud Supabase if logged in, else Local API fallback)
   const refreshAllData = useCallback(async () => {
     try {
-      const [c, p, b, pl, tx, ins] = await Promise.all([
-        api.getConsent(),
-        api.getProfile(),
-        api.getBudgetHealth(),
-        api.getInvestmentPlan(),
-        api.getTransactions(),
-        api.getAIInsights(),
-      ]);
+      if (user && supabase) {
+        // 1. Fetch cloud records for this authenticated user
+        const [c, p, tx] = await Promise.all([
+          supabaseService.getConsent(user.id),
+          supabaseService.getProfile(user.id),
+          supabaseService.getTransactions(user.id),
+        ]);
 
-      setConsent(c);
-      setProfile(p);
-      setBudget(b);
-      setPlan(pl);
-      setTransactions(tx);
-      setInsights(ins);
+        const activeConsent: UserConsent = c || {
+          shareTransactions: true,
+          shareIncome: true,
+          shareInvestments: true,
+          aiAdvisoryConsent: true,
+          lastUpdated: new Date().toISOString(),
+        };
+
+        const activeProfile: UserProfile = p || {
+          name: user.user_metadata?.full_name || 'My Account',
+          monthlyIncome: 85000,
+          savingsGoal: 25000,
+          riskTolerance: 'moderate',
+          investmentHorizonYears: 7,
+          emergencyFundTargetMonths: 6,
+          emergencyFundCurrent: 180000,
+          existingInvestments: { equity: 250000, debt: 120000, gold: 60000, cash: 40000 },
+        };
+
+        const activeTx: Transaction[] = tx || [];
+
+        // Real-time calculations with FinancialEngine
+        const b = FinancialEngine.calculateBudgetHealth(activeTx, activeProfile, activeConsent);
+        const pl = FinancialEngine.generateInvestmentPlan(activeProfile, b, activeConsent);
+
+        setConsent(activeConsent);
+        setProfile(activeProfile);
+        setTransactions(activeTx);
+        setBudget(b);
+        setPlan(pl);
+
+        try {
+          const ins = await api.getAIInsights();
+          setInsights(ins);
+        } catch {
+          setInsights([]);
+        }
+      } else {
+        // 2. Demo / Offline Fallback (Local API)
+        const [c, p, b, pl, tx, ins] = await Promise.all([
+          api.getConsent(),
+          api.getProfile(),
+          api.getBudgetHealth(),
+          api.getInvestmentPlan(),
+          api.getTransactions(),
+          api.getAIInsights(),
+        ]);
+
+        setConsent(c);
+        setProfile(p);
+        setBudget(b);
+        setPlan(pl);
+        setTransactions(tx);
+        setInsights(ins);
+      }
     } catch (err) {
       console.error('Failed to load application data:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     refreshAllData();
@@ -122,40 +201,82 @@ export function App() {
 
   // Handlers
   const handleUpdateConsent = async (updated: Partial<UserConsent>) => {
-    const newConsent = await api.updateConsent(updated);
-    setConsent(newConsent);
-    // Refresh calculations based on updated consent
+    if (user && supabase) {
+      await supabaseService.updateConsent(user.id, updated);
+      showToast('Privacy consent settings updated in Supabase cloud!');
+    } else {
+      await api.updateConsent(updated);
+    }
     await refreshAllData();
   };
 
   const handleWipeData = async () => {
-    await api.wipeUserData();
+    if (user && supabase) {
+      await supabaseService.wipeUserData(user.id);
+      showToast('All your cloud records have been permanently erased (Right to be Forgotten).', 'info');
+    } else {
+      await api.wipeUserData();
+    }
     await refreshAllData();
   };
 
   const handleResetDemo = async () => {
-    await api.resetDemoData();
+    if (user && supabase) {
+      await supabaseService.resetDemoData(user.id);
+      showToast('Restored demo profile & starter transactions in Supabase!', 'success');
+    } else {
+      await api.resetDemoData();
+    }
     await refreshAllData();
   };
 
   const handleAddTransaction = async (tx: Omit<Transaction, 'id'>) => {
-    await api.addTransaction(tx);
+    if (user && supabase) {
+      await supabaseService.addTransaction(user.id, tx);
+      showToast(`Added ${tx.type === 'income' ? 'income' : 'expense'}: ${tx.description}`);
+    } else {
+      await api.addTransaction(tx);
+    }
     await refreshAllData();
   };
 
   const handleDeleteTransaction = async (id: string) => {
-    await api.deleteTransaction(id);
+    if (user && supabase) {
+      await supabaseService.deleteTransaction(user.id, id);
+      showToast('Transaction deleted from cloud.');
+    } else {
+      await api.deleteTransaction(id);
+    }
     await refreshAllData();
   };
 
   const handleUploadCSV = async (file: File) => {
     const res = await api.uploadCSV(file);
+    if (user && supabase && res.transactions) {
+      for (const tx of res.transactions) {
+        await supabaseService.addTransaction(user.id, {
+          date: tx.date,
+          description: tx.description,
+          source: tx.source,
+          amount: tx.amount,
+          type: tx.type,
+          category: tx.category,
+          paymentMethod: tx.paymentMethod,
+          notes: tx.notes,
+        });
+      }
+    }
     await refreshAllData();
     return res;
   };
 
   const handleUpdateRiskProfile = async (risk: RiskTolerance) => {
-    await api.updateProfile({ riskTolerance: risk });
+    if (user && supabase) {
+      await supabaseService.updateProfile(user.id, { riskTolerance: risk });
+      showToast(`Switched risk profile to ${risk.toUpperCase()}`);
+    } else {
+      await api.updateProfile({ riskTolerance: risk });
+    }
     await refreshAllData();
   };
 
@@ -166,19 +287,45 @@ export function App() {
     return api.chatWithAI(message, history);
   };
 
+  const handleSignOut = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+      setUser(null);
+      showToast('Signed out of cloud account.');
+      await refreshAllData();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 transition-colors">
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 animate-pulse mb-4 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
           F
         </div>
-        <p className="text-sm font-medium">Initializing FinPulse AI & Consent Telemetry...</p>
+        <p className="text-sm font-medium">Initializing FinPulse AI & Supabase Telemetry...</p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 animate-slide-up">
+          <div
+            className={`px-4 py-3 rounded-xl shadow-xl text-xs font-semibold border backdrop-blur-md flex items-center gap-2 ${
+              toastMessage.type === 'error'
+                ? 'bg-rose-500/90 text-white border-rose-400'
+                : toastMessage.type === 'info'
+                ? 'bg-blue-600/90 text-white border-blue-400'
+                : 'bg-emerald-600/90 text-white border-emerald-400'
+            }`}
+          >
+            <span>{toastMessage.message}</span>
+          </div>
+        </div>
+      )}
+
       {/* Top Navbar */}
       <Navbar
         consent={consent}
@@ -187,10 +334,13 @@ export function App() {
         onOpenAddModal={() => setIsAddModalOpen(true)}
         onOpenCSVModal={() => setIsCSVModalOpen(true)}
         onNavigateToConsent={() => setCurrentTab('consent')}
+        user={user}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onSignOut={handleSignOut}
       />
 
       <div className="flex-1 flex max-w-[1720px] w-full mx-auto">
-        {/* Navigation (Sidebar on desktop / Bottom bar on mobile) */}
+        {/* Navigation */}
         <Navigation
           currentTab={currentTab}
           onSelectTab={(tab) => setCurrentTab(tab)}
@@ -206,7 +356,7 @@ export function App() {
             />
           )}
 
-          {/* Tab Views: Kept mounted in DOM with display toggle to preserve state, conversation history, and scroll position */}
+          {/* Tab Views: Kept mounted in DOM with display toggle */}
           <div className={currentTab === 'dashboard' ? 'block' : 'hidden'}>
             <Dashboard
               budget={budget}
@@ -276,6 +426,17 @@ export function App() {
         isOpen={isCSVModalOpen}
         onClose={() => setIsCSVModalOpen(false)}
         onUpload={handleUploadCSV}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={(loggedInUser) => {
+          setUser(loggedInUser);
+          showToast(`Signed in as ${loggedInUser.email}!`);
+          refreshAllData();
+        }}
+        showToast={showToast}
       />
     </div>
   );
